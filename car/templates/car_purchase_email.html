@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Confirmation</title>
+</head>
+<body>
+    <h2>Thank you for your order, {{ user.username }}!</h2>
+
+    <p>You are about to purchase:</p>
+
+    <ul>
+        <li><strong>Car:</strong> {{ car.title }}</li>
+        <li><strong>Price:</strong> {{ car.price }} USD</li>
+        <li><strong>Order ID:</strong> {{ purchase.id }}</li>
+    </ul>
+
+    <p>After successful payment, we will complete your order.</p>
+
+    <p>Thank you for buy a car with us!</p>
+
+</body>
+</html>

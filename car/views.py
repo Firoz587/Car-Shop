@@ -10,7 +10,10 @@ from sslcommerz_lib import SSLCOMMERZ
 from car.models import Purchase,Car
 import random,string
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 # Create your views here.
+
 class CarDetailsView(DetailView):
     model = Car
     pk_url_kwarg = 'id'
@@ -101,6 +104,56 @@ def unique_transactions_id_generator(size=10,chars=string.ascii_uppercase+string
 #     else:
 #         return render(request, 'buy_car.html', {'car': car, 'tag': 'danger', 'msg': 'Oops! This Car stock is out!'})
 @login_required
+# def BuyCarView(request, id):
+#     car = get_object_or_404(Car, pk=id)
+
+#     if car.quantity > 0:
+#         car.quantity -= 1
+#         car.save()
+#         purchase = Purchase.objects.create(user=request.user, car=car, quantity=1)
+
+#         # SSLCommerz Configuration
+#         settings = {
+#             'store_id': 'bdjew67b71659ea172',
+#             'store_pass': 'bdjew67b71659ea172@ssl',
+#             'issandbox': True
+#         }
+#         sslcz = SSLCOMMERZ(settings)
+
+#         post_body = {
+#             'total_amount': str(car.price),  # Ensure price is passed as a string
+#             'currency': "BDT",
+#             'tran_id': unique_transactions_id_generator(),
+#             'success_url': "http://127.0.0.1:8000/user/profile/",
+#             'fail_url': "http://127.0.0.1:8000/",
+#             'cancel_url': "http://127.0.0.1:8000/",
+#             'emi_option': 0,
+#             'cus_name': request.user.username,
+#             'cus_email': request.user.email,
+#             'cus_phone': "01700000000",
+#             'cus_add1': "Uttara",
+#             'cus_city': "Dhaka",
+#             'cus_country': "Bangladesh",
+#             'shipping_method': "NO",
+#             'multi_card_name': "",
+#             'num_of_item': 1,
+#             'product_name': car.title,
+#             'product_category': "Car",
+#             'product_profile': "general"
+#         }
+
+#         response = sslcz.createSession(post_body)
+
+#         if 'GatewayPageURL' in response:
+#             return redirect(response['GatewayPageURL'])
+#         else:
+#             return render(request, 'buy_car.html', {'car': car, 'tag': 'danger', 'msg': 'Payment gateway error!'})
+
+#     else:
+#         return render(request, 'buy_car.html', {'car': car, 'tag': 'danger', 'msg': 'Oops! This Car stock is out!'})
+
+
+@login_required
 def BuyCarView(request, id):
     car = get_object_or_404(Car, pk=id)
 
@@ -108,6 +161,23 @@ def BuyCarView(request, id):
         car.quantity -= 1
         car.save()
         purchase = Purchase.objects.create(user=request.user, car=car, quantity=1)
+
+        # ===> Send Email Before Payment
+        email_subject = "Order Confirmation - Car Purchase"
+        email_body = render_to_string('car_purchase_email.html', {
+            'user': request.user,
+            'car': car,
+            'purchase': purchase,
+        })
+
+        email = EmailMultiAlternatives(
+            email_subject,
+            '',  # Empty text content because we are sending HTML
+            to=[request.user.email]
+        )
+        email.attach_alternative(email_body, "text/html")
+        email.send()
+        # ===> Email sending done
 
         # SSLCommerz Configuration
         settings = {
@@ -118,7 +188,7 @@ def BuyCarView(request, id):
         sslcz = SSLCOMMERZ(settings)
 
         post_body = {
-            'total_amount': str(car.price),  # Ensure price is passed as a string
+            'total_amount': str(car.price),
             'currency': "BDT",
             'tran_id': unique_transactions_id_generator(),
             'success_url': "http://127.0.0.1:8000/user/profile/",
