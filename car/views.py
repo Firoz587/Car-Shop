@@ -12,6 +12,8 @@ import random,string
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from decimal import Decimal
+from .models import Car
 # Create your views here.
 
 class CarDetailsView(DetailView):
@@ -104,6 +106,36 @@ def unique_transactions_id_generator(size=10,chars=string.ascii_uppercase+string
 #     else:
 #         return render(request, 'buy_car.html', {'car': car, 'tag': 'danger', 'msg': 'Oops! This Car stock is out!'})
 @login_required
+
+def suggest_car_view(request):
+    suggested_price = None
+    cars = []
+
+    if request.method == "POST":
+        full_name = request.POST.get("full_name")
+        job_name = request.POST.get("job_name")
+        salary = request.POST.get("salary")
+        family_members = request.POST.get("family_members")
+
+        try:
+            salary = Decimal(salary)
+            family_members = int(family_members)
+
+            base_budget = salary * Decimal(12) * Decimal(0.25)
+            adjustment = Decimal(1) - (Decimal(0.05) * family_members)
+            suggested_price = round(base_budget * adjustment, 2)
+
+            cars = Car.objects.filter(price__lte=suggested_price).order_by('price')
+
+        except:
+            suggested_price = "Invalid input"
+
+    return render(request, 'car_suggest.html', {
+        'suggested_price': suggested_price,
+        'cars': cars
+    })
+
+
 # def BuyCarView(request, id):
 #     car = get_object_or_404(Car, pk=id)
 

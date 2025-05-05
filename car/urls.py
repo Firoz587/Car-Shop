@@ -8,4 +8,5 @@ urlpatterns = [
     path('delete/<int:id>', DeleteCarView.as_view(), name='delete_car'),
     path('buy_now/<int:id>/', BuyCarView, name='buy_now'),
     # path('pay/', views.payment, name='payment'),
+    path('suggest-car/', views.suggest_car_view, name='suggest_car'),
 ]

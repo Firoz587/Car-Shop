@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title mb-4">AI Car Price Suggestion</h4>
+            <form action="{% url 'suggest_car' %}" method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Full Name</label>
+                    <input class="form-control" type="text" name="full_name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Job Name</label>
+                    <input class="form-control" type="text" name="job_name" placeholder="Your job title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Monthly Salary</label>
+                    <input class="form-control" type="number" name="salary" placeholder="e.g. 5000" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Number of Family Members</label>
+                    <input class="form-control" type="number" name="family_members" placeholder="e.g. 3" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Suggested Car Budget</label>
+                    <input class="form-control" type="text" name="suggested_price" readonly value="{{ suggested_price }}">
+                </div>
+
+                <button class="btn btn-primary w-100" type="submit">Get Suggestion</button>
+            </form>
+        </div>
+    </div>
+
+    {% if suggested_price and cars %}
+    <div class="card mt-4 shadow-sm">
+        <div class="card-body">
+            <h5>Recommended Cars under ${{ suggested_price }}</h5>
+            <div class="row">
+                {% for car in cars %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        {% if car.image %}
+                        <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ car.title }}</h6>
+                            <p class="card-text">{{ car.description|truncatewords:15 }}</p>
+                            <strong>${{ car.price }}</strong>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
