@@ -50,9 +50,15 @@
                         <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.title }}">
                         {% endif %}
                         <div class="card-body">
-                            <h6 class="card-title">{{ car.title }}</h6>
-                            <p class="card-text">{{ car.description|truncatewords:15 }}</p>
-                            <strong>${{ car.price }}</strong>
+                            <h2 class="fw-bold">{{car.title}}</h2>
+                            <h4>Brand: {{car.brand}}</h4>
+                            <h5 class="mb-4">Quantity: {{car.quantity}} Pcs</h5>
+                            <p class="card-text mb-1">
+                                {{car.description|truncatewords:20}}
+                                <a href="{% url 'view_car' car.id %}">See More</a>
+                            </p>
+                            <strong>${{ car.price }}</strong></br>
+                            <a href="{% url 'buy_now' id=car.id %}" class="btn btn-dark px-4">Buy <b>{{car.title}}</b> Now</a>
                         </div>
                     </div>
                 </div>
